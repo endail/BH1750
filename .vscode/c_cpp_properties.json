@@ -1,0 +1,49 @@
+{
+    "configurations": [
+        {
+            "name": "RaspberryPi",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include\\c++\\8",
+                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include\\arm-linux-gnueabihf\\c++\\8",
+                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include\\c++\\8\\backward",
+                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\lib\\gcc\\arm-linux-gnueabihf\\8\\include",
+                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\local\\include",
+                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\lib\\gcc\\arm-linux-gnueabihf\\8\\include-fixed",
+                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include\\arm-linux-gnueabihf",
+                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.18362.0",
+            "compilerPath": "H:\\SysGCC\\bin\\arm-linux-gnueabihf-g++.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "linux-gcc-arm",
+            "compilerArgs": [
+                "-std=c++11",
+                "-Wall",
+                "-Wno-psabi",
+                "-O2",
+                "-D_FORTIFY_SOURCE=2",
+                "-D_GLIBCXX_ASSERTIONS",
+                "-fexceptions",
+                "-fpie",
+                "-Wl,-pie",
+                "-fstack-clash-protection",
+                "-pipe",
+                "-Werror=format-security",
+                "-Werror=implicit-function-declaration",
+                "-Wl,-z,defs",
+                "-Wl,-z,now",
+                "-Wl,-z,relro",
+                "-fwrapv",
+                "-mfloat-abi=hard"
+            ]
+        }
+    ],
+    "version": 4
+}
