@@ -4,22 +4,21 @@
             "name": "RaspberryPi",
             "includePath": [
                 "${workspaceFolder}/**",
-                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include\\c++\\8",
-                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include\\arm-linux-gnueabihf\\c++\\8",
-                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include\\c++\\8\\backward",
-                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\lib\\gcc\\arm-linux-gnueabihf\\8\\include",
-                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\local\\include",
-                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\lib\\gcc\\arm-linux-gnueabihf\\8\\include-fixed",
-                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include\\arm-linux-gnueabihf",
-                "H:\\SysGCC\\arm-linux-gnueabihf\\sysroot\\usr\\include"
+                "${env:RPI_TOOLCHAIN}/arm-linux-gnueabihf/sysroot/usr/include/c++/8",
+                "${env:RPI_TOOLCHAIN}/arm-linux-gnueabihf/sysroot/usr/include/arm-linux-gnueabihf/c++/8",
+                "${env:RPI_TOOLCHAIN}/arm-linux-gnueabihf/sysroot/usr/include/c++/8/backward",
+                "${env:RPI_TOOLCHAIN}/arm-linux-gnueabihf/sysroot/usr/lib/gcc/arm-linux-gnueabihf/8/include",
+                "${env:RPI_TOOLCHAIN}/arm-linux-gnueabihf/sysroot/usr/local/include",
+                "${env:RPI_TOOLCHAIN}/arm-linux-gnueabihf/sysroot/usr/lib/gcc/arm-linux-gnueabihf/8/include-fixed",
+                "${env:RPI_TOOLCHAIN}/arm-linux-gnueabihf/sysroot/usr/include/arm-linux-gnueabihf",
+                "${env:RPI_TOOLCHAIN}/arm-linux-gnueabihf/sysroot/usr/include"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "windowsSdkVersion": "",
-            "compilerPath": "H:\\SysGCC\\bin\\arm-linux-gnueabihf-g++.exe",
+            "compilerPath": "${env:RPI_TOOLCHAIN}/bin/arm-linux-gnueabihf-g++.exe",
             "cStandard": "c11",
             "cppStandard": "c++11",
             "intelliSenseMode": "linux-gcc-arm",

@@ -26,7 +26,9 @@
 #include <cstdint>
 #include <stdexcept>
 #include <thread>
+#include <unistd.h>
 #include <wiringPiI2C.h>
+#include "Instruction.h"
 
 namespace BH1750 {
 class BH1750 {
@@ -53,24 +55,161 @@ public:
 	static constexpr std::chrono::milliseconds TYP_LOW_RES_TIME = std::chrono::milliseconds(16);
 	static constexpr std::chrono::milliseconds MAX_LOW_RES_TIME = std::chrono::milliseconds(24);
 
-	enum class Instruction : uint8_t {
-		POWER_DOWN = 0b00000000,
-		POWER_ON = 0b00000001,
-		RESET = 0b00000111,
-		CONTINUOUS_HIGH_RES_MODE = 0b00010000,
-		CONTINUOUS_HIGH_RES_MODE_2 = 0b00010001,
-		CONTINUOUS_LOW_RES_MODE = 0b00010011,
-		ONE_TIME_HIGH_RES_MODE = 0b00100000,
-		ONE_TIME_HIGH_RES_MODE_2 = 0b00100001,
-		ONE_TIME_LOW_RES_MODE = 0b00100011
-	};
+
+	static bool isHighRes(const MeasurementMode mode) noexcept {
+		
+		switch(mode) {
+			case MeasurementMode::CONTINUOUS_HIGH_RES_MODE:
+			case MeasurementMode::CONTINUOUS_HIGH_RES_MODE_2:
+			case MeasurementMode::ONE_TIME_HIGH_RES_MODE:
+			case MeasurementMode::ONE_TIME_HIGH_RES_MODE_2:
+				return true;
+		}
+
+		return false;
+
+	}
+
+	static bool isLowRes(const MeasurementMode mode) noexcept {
+
+		switch(mode) {
+			case MeasurementMode::CONTINUOUS_LOW_RES_MODE:
+			case MeasurementMode::ONE_TIME_LOW_RES_MODE:
+				return true;
+		}
+
+		return false;
+
+	}
+
+	static bool isMode2(const MeasurementMode mode) noexcept {
+
+		switch(mode) {
+			case MeasurementMode::CONTINUOUS_HIGH_RES_MODE_2:
+			case MeasurementMode::ONE_TIME_HIGH_RES_MODE_2:
+				return true;
+		}
+
+		return false;
+
+	}
+
+	static bool isContinuous(const MeasurementMode mode) noexcept {
+
+		switch(mode) {
+			case MeasurementMode::CONTINUOUS_HIGH_RES_MODE:
+			case MeasurementMode::CONTINUOUS_HIGH_RES_MODE_2:
+			case MeasurementMode::CONTINUOUS_LOW_RES_MODE:
+				return true;
+		}
+
+		return false;
+
+	}
+
+	static bool isOneTime(const MeasurementMode mode) noexcept {
+
+		switch(mode) {
+			case MeasurementMode::ONE_TIME_HIGH_RES_MODE:
+			case MeasurementMode::ONE_TIME_HIGH_RES_MODE_2:
+			case MeasurementMode::ONE_TIME_LOW_RES_MODE:
+				return true;
+		}
+
+		return false;
+
+	}
+
+	static std::chrono::duration calculateWaitTime(
+		const uint8_t mt,
+		const MeasurementMode mode,
+		const bool maxWait = true) noexcept {
+
+		using namespace std::chrono;
+
+			const double ms = static_cast<double>(mt) / static_cast<double>(TYP_MTREG);
+			
+			if(isHighRes(mode)) {
+				return milliseconds(ms * maxWait ? MAX_HIGH_RES_TIME : TYP_HIGH_RES_TIME);
+			}
+
+			return milliseconds(ms * maxWait ? MAX_LOW_RES_TIME : TYP_LOW_RES_TIME);
+
+	}
+
+	/**
+	 * Converts a sensor light level into lux level depending on current mode
+	 * @param  {uint16_t} level : 
+	 * @return {double}         : 
+	 */
+	static double convertLevel(
+		const uint16_t level,
+		const MeasurementMode mode,
+		const uint8_t mt) noexcept {
+
+			double temp = static_cast<double>(level);
+
+			if(isHighRes(mode)) {
+
+				//all high res modes
+				temp = temp * static_cast<double>(TYP_MTREG) / static_cast<double>(mt);
+
+				//only for high res and mode 2
+				if(isMode2(mode)) {
+					temp = temp / 2.0;
+				}
+
+			}
+
+			//all modes
+			return temp * TYP_MEASUREMENT_ACCURACY;
+
+	}
+
 
 protected:
 	const char* _dev;
 	const int8_t _addr;
 	int _fd = -1;
-	Instruction _mode = Instruction::POWER_DOWN;
+	PowerMode _powerMode = PowerMode::POWER_OFF;
+	MeasurementMode _measurementMode;
+	MeasurementMode _lastMeasurementMode;
 	uint8_t _mtReg = TYP_MTREG;
+
+	void _setMeasurementMode(const MeasurementMode mode) {
+
+		if(::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(mode)) < 0) {
+			throw std::runtime_error("failed to set measurement mode");
+		}
+
+		this->_measurementMode = mode;
+
+	}
+
+	void _setMeasurementTimeRegister(const uint8_t mt) {
+
+		//https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf
+		//pg. 11
+		//range is between 31 (inc) and 254 (inc)
+		if(!(mt >= MIN_MTREG && mt <= MAX_MTREG)) {
+			throw std::range_error("reg must be between 31 and 254");
+		}
+
+		//there's an issue here with measurement mode
+		//if setMeasurementMode is called AFTER this function, the
+		//config will be incorrect
+		//
+		//is the third I2C write call needed?
+		if(	::wiringPiI2CWrite(this->_fd, 0b01000000 | (mt & 0b11100000)) < 0 ||
+			::wiringPiI2CWrite(this->_fd, 0b01100000 | (mt & 0b00011111)) < 0 ||
+			::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(this->_measurementMode)) < 0 ) {
+				throw std::runtime_error("failed to set measurement register");
+		}
+
+		this->_mtReg = mt;
+
+	}
+
 
 public:
 
@@ -80,166 +219,80 @@ public:
 			: _dev(device), _addr(addr) {
 	}
 
-	~BH1750() = default;
-
-	const char* getDevice() const noexcept {
-		return this->_dev;
+	~BH1750() {
+		::close(this->_fd);
 	}
 
-	int8_t getAddress() const noexcept {
-		return this->_addr;
+	MeasurementMode getMeasurementMode() const noexcept {
+		return this->_measurementMode;
 	}
 
-	int getFileDescriptor() const noexcept {
-		return this->_fd;
+	MeasurementMode getLastMeasurementMode() const noexcept {
+		return this->_lastMeasurementMode;
 	}
 
-	Instruction getMode() const noexcept {
-		return this->_mode;
-	}
-
-	uint8_t getMeasurementTimeRegister() const noexcept {
+	uint8_t getMeasurementTime() const noexcept {
 		return this->_mtReg;
 	}
 
-	bool isHighRes() const noexcept {
-		
-		switch(this->_mode) {
-			case Instruction::CONTINUOUS_HIGH_RES_MODE:
-			case Instruction::CONTINUOUS_HIGH_RES_MODE_2:
-			case Instruction::ONE_TIME_HIGH_RES_MODE:
-			case Instruction::ONE_TIME_HIGH_RES_MODE_2:
-				return true;
-		}
+	/**
+	 * Start communicating with the BH1750 device
+	 * @param  {MeasurementMode} mode : 
+	 */
+	void connect(
+		const MeasurementMode mm = MeasurementMode::CONTINUOUS_HIGH_RES_MODE,
+		const uint8_t mt = TYP_MTREG) {
 
-		return false;
+			//only permit this function to execute if no file descriptor set
+			if(this->_fd >= 0) {
+				throw std::runtime_error("sensor is already connected");
+			}
 
-	}
+			if((this->_fd = ::wiringPiI2CSetupInterface(this->_dev, this->_addr)) < 0) {
+				throw std::runtime_error("failed to connect to device");
+			}
 
-	bool isLowRes() const noexcept {
-
-		switch(this->_mode) {
-			case Instruction::CONTINUOUS_LOW_RES_MODE:
-			case Instruction::ONE_TIME_LOW_RES_MODE:
-				return true;
-		}
-
-		return false;
+			this->_powerMode = PowerMode::POWER_ON;
+			this->setMeasurementMode(mm);
+			this->setMeasurementTimeRegister(mt);
 
 	}
 
-	bool isMode2() const noexcept {
-
-		switch(this->_mode) {
-			case Instruction::CONTINUOUS_HIGH_RES_MODE_2:
-			case Instruction::ONE_TIME_HIGH_RES_MODE_2:
-				return true;
-		}
-
-		return false;
-
-	}
-
-	bool isContinuous() const noexcept {
-
-		switch(this->_mode) {
-			case Instruction::CONTINUOUS_HIGH_RES_MODE:
-			case Instruction::CONTINUOUS_HIGH_RES_MODE_2:
-			case Instruction::CONTINUOUS_LOW_RES_MODE:
-				return true;
-		}
-
-		return false;
-
-	}
-
-	bool isOneTime() const noexcept {
-
-		switch(this->_mode) {
-			case Instruction::ONE_TIME_HIGH_RES_MODE:
-			case Instruction::ONE_TIME_HIGH_RES_MODE_2:
-			case Instruction::ONE_TIME_LOW_RES_MODE:
-				return true;
-		}
-
-		return false;
-
-	}
-
-	void begin(const Instruction mode = Instruction::CONTINUOUS_HIGH_RES_MODE) {
-
-		if((this->_fd = ::wiringPiI2CSetupInterface(this->_dev, this->_addr)) < 0) {
-			throw std::runtime_error("failed to connect to device");
-		}
-
-		this->configure(mode);
-		this->setMeasurementRegister(TYP_MTREG);
-
-	}
-
-	void configure(const Instruction mode = Instruction::CONTINUOUS_HIGH_RES_MODE) {
-
-		switch(mode) {
-			case Instruction::CONTINUOUS_HIGH_RES_MODE:
-			case Instruction::CONTINUOUS_HIGH_RES_MODE_2:
-			case Instruction::CONTINUOUS_LOW_RES_MODE:
-			case Instruction::ONE_TIME_HIGH_RES_MODE:
-			case Instruction::ONE_TIME_HIGH_RES_MODE_2:
-			case Instruction::ONE_TIME_LOW_RES_MODE:
-				break;
-			default:
-				throw std::runtime_error("mode is not permitted");
-		}
-
-		if(::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(mode)) < 0) {
-			throw std::runtime_error("failed to configure device");
-		}
-
-		this->_mode = mode;
-
-	}
-
+	/**
+	 * Instruct the sensor to measure light level
+	 */
 	void measure() {
+
+		if(this->_powerMode == PowerMode::POWER_DOWN) {
+			throw std::runtime_error("sensor is powered down");
+		}
 		
-		if(::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(this->_mode)) < 0) {
+		if(::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(this->_measurementMode)) < 0) {
 			throw std::runtime_error("failed to measure light level");
 		}
+
+		this->_lastMeasurementMode = this->_measurementMode;
 
 		//https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf
 		//pg. 5
 		//One Time modes return the device to power down mode after
 		//measurement
-		if(this->isOneTime()) {
-			this->_mode = Instruction::POWER_DOWN;
+		if(isOneTime(this->_lastMeasurementMode)) {
+			this->_powerMode = PowerMode::POWER_DOWN;
 		}
 
 	}
 
-	std::chrono::milliseconds waitTime(const bool maxWait = true) const noexcept {
-
-		using namespace std::chrono;
-
-		const double ms = static_cast<double>(this->_mtReg) / static_cast<double>(TYP_MTREG);
-		
-		if(this->isHighRes()) {
-			return milliseconds(ms * maxWait ? MAX_HIGH_RES_TIME : TYP_HIGH_RES_TIME);
-		}
-
-		return milliseconds(ms * maxWait ? MAX_LOW_RES_TIME : TYP_LOW_RES_TIME);
-
-	}
-
-	void wait() const noexcept {
-		std::this_thread::sleep_for(this->waitTime());
-	}
-
-	void reset() {
+	/**
+	 * Clear the sensor's measurement register
+	 */
+	void reset() const {
 
 		//https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf
 		//pg. 5
 		//"Reset Data register value. Reset command is not acceptable in
 		//Power Down mode."
-		if(this->_mode == Instruction::POWER_DOWN) {
+		if(this->_mode == PowerMode::POWER_DOWN) {
 			throw std::runtime_error("cannot reset while powered down");
 		}
 
@@ -249,26 +302,22 @@ public:
 
 	}
 
-	void setMeasurementRegister(const uint8_t reg) noexcept {
-
-		//https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf
-		//pg. 11
-		//range is between 31 (inc) and 254 (inc)
-		if(!(reg >= MIN_MTREG && reg <= MAX_MTREG)) {
-			throw std::range_error("reg must be between 31 and 254");
-		}
-
-		if(	::wiringPiI2CWrite(this->_fd, 0b01000000 | (reg & 0b11100000)) < 0 ||
-			::wiringPiI2CWrite(this->_fd, 0b01100000 | (reg & 0b00011111)) < 0 ||
-			::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(this->_mode)) < 0 ) {
-				throw std::runtime_error("failed to set measurement register");
-		}
-
-		this->_mtReg = reg;
-
+	/**
+	 * This function exists because of the chance setting mt reg will be incorrect
+	 * if mode is changed
+	 * @param  {MeasurementMode} mode : 
+	 * @param  {uint8_t} mt           : 
+	 */
+	void configure(const MeasurementMode mode, const uint8_t mt = TYP_MTREG) {
+		this->_setMeasurementMode(mode);
+		this->_setMeasurementTimeRegister(mt);
 	}
 
-	uint16_t readLevel() {
+	/**
+	 * Read the currently stored light level from the sensor
+	 * @return {uint16_t}  : 
+	 */
+	uint16_t readLevel() const {
 
 		//may need to replace this with two 8-bit reads
 		//or lower-level 16bit read() call
@@ -282,59 +331,53 @@ public:
 
 	}
 
-	double convertLevel(const uint16_t level) const noexcept {
-
-		double temp = static_cast<double>(level);
-
-		if(this->isHighRes()) {
-
-			//all high res modes
-			temp = temp * static_cast<double>(TYP_MTREG) /
-				static_cast<double>(this->_mtReg);
-
-			//only for high res and mode 2
-			if(this->isMode2()) {
-				temp = temp / 2;
-			}
-
-		}
-
-		//all modes
-		return temp * TYP_MEASUREMENT_ACCURACY;
-
-	}
-
+	/**
+	 * Measure lux from the sensor
+	 * @return {double}  : 
+	 */
 	double lux() {
 
-		if(this->_mode == Instruction::POWER_DOWN) {
-			throw std::runtime_error("device is not powered");
-		}
-
-		this->reset(); //is reset necessary?
 		this->measure();
-		this->wait();
 
-		return this->convertLevel(this->readLevel());
+		const std::chrono::duration waitTime = calculateWaitTime(
+			this->_mtReg,
+			this->_lastMeasurementMode,
+			true);
+
+		std::this_thread::sleep_for(waitTime);
+
+		return convertLevel(
+			this->readLevel(),
+			this->_lastMeasurementMode,
+			this->_mtReg);
 
 	}
 
 	void power_down() {
 
-		if(::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(Instruction::POWER_DOWN)) < 0) {
+		if(this->_powerMode == PowerMode::POWER_OFF) {
+			return;
+		}
+
+		if(::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(PowerMode::POWER_DOWN)) < 0) {
 			throw std::runtime_error("device failed to power down");
 		}
 
-		this->_mode = Instruction::POWER_DOWN;
+		this->_powerMode = PowerMode::POWER_DOWN;
 
 	}
 
 	void power_up() {
 
-		if(::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(Instruction::POWER_ON)) < 0) {
+		if(this->_powerMode == PowerMode::POWER_ON) {
+			return;
+		}
+
+		if(::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(PowerMode::POWER_ON)) < 0) {
 			throw std::runtime_error("device failed to power on");
 		}
 
-		this->_mode = Instruction::POWER_ON;
+		this->_powerMode = PowerMode::POWER_ON;
 
 	}
 
