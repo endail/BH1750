@@ -7,12 +7,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-          
+      
+      - name: clone wiringPi
+        uses: actions/checkout@v2
+        with:
+          repository: 'WiringPi/WiringPi'
+        
+      - name: build wiringPi
+        run: |
+          cd WiringPi;
+          ./build;
+
       - name: cppcheck
         uses: deep5050/cppcheck-action@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN}}
-          
         
       - name: publish report    
         uses: mikeal/publish-to-github-action@master
