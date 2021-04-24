@@ -18,7 +18,7 @@
                 "UNICODE",
                 "_UNICODE"
             ],
-            "windowsSdkVersion": "10.0.18362.0",
+            "windowsSdkVersion": "",
             "compilerPath": "H:\\SysGCC\\bin\\arm-linux-gnueabihf-g++.exe",
             "cStandard": "c11",
             "cppStandard": "c++11",
