@@ -235,10 +235,6 @@ public:
 		return this->_mtReg;
 	}
 
-	/**
-	 * Start communicating with the BH1750 device
-	 * @param  {MeasurementMode} mode : 
-	 */
 	void connect(
 		const MeasurementMode mm = MeasurementMode::CONTINUOUS_HIGH_RES_MODE,
 		const uint8_t mt = TYP_MTREG) {
@@ -253,8 +249,8 @@ public:
 			}
 
 			this->_powerMode = PowerMode::POWER_ON;
-			this->setMeasurementMode(mm);
-			this->setMeasurementTimeRegister(mt);
+			this->_setMeasurementMode(mm);
+			this->_setMeasurementTimeRegister(mt);
 
 	}
 
