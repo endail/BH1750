@@ -124,7 +124,7 @@ double BH1750::convertLevel(
 		}
 		else {
 			temp = temp / acc * 
-				(static_cast<double>(TYP_MEASUREMENT_ACCURACY) / static_cast<double>(mt));
+				(static_cast<double>(TYP_MTREG) / static_cast<double>(mt));
 		}
 
 		return temp;
