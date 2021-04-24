@@ -15,8 +15,9 @@ jobs:
         
       - name: build wiringPi
         run: |
-          cd WiringPi;
-          ./build;
+          ls -al
+          cd WiringPi
+          ./build
 
       - name: cppcheck
         uses: deep5050/cppcheck-action@main
