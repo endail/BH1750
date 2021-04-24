@@ -6,8 +6,7 @@ jobs:
     name: cppcheck-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      
+    
       - name: clone wiringPi
         uses: actions/checkout@v2
         with:
@@ -15,6 +14,8 @@ jobs:
 
       - name: build wiringPi
         run: ./build; cd ..
+
+      - uses: actions/checkout@v2
 
       - name: cppcheck
         uses: deep5050/cppcheck-action@main
