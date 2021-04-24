@@ -112,24 +112,22 @@ std::chrono::duration BH1750::calculateWaitTime(
 double BH1750::convertLevel(
 	const uint16_t level,
 	const MeasurementMode mode,
-	const uint8_t mt) noexcept {
+	const uint8_t mt,
+	const float acc) noexcept {
 
 		double temp = static_cast<double>(level);
 
-		if(isHighRes(mode)) {
-
-			//all high res modes
-			temp = temp * static_cast<double>(TYP_MTREG) / static_cast<double>(mt);
-
-			//only for high res and mode 2
-			if(isMode2(mode)) {
-				temp = temp / 2.0;
-			}
-
+		if(isHighRes(mode) && isMode2(mode)) {
+			temp = (temp / acc) *
+				(static_cast<double>(TYP_MTREG) / static_cast<double>(mt)) /
+				2.0;
+		}
+		else {
+			temp = temp / acc * 
+				(static_cast<double>(TYP_MEASUREMENT_ACCURACY) / static_cast<double>(mt));
 		}
 
-		//all modes
-		return temp * TYP_MEASUREMENT_ACCURACY;
+		return temp;
 
 }
 
@@ -167,6 +165,16 @@ void BH1750::_setMeasurementTimeRegister(const uint8_t mt) {
 
 }
 
+BH1750::_setMeasurementAccuracy(const float acc) noexcept {
+
+	if(acc < MIN_MEASUREMENT_ACCURACY || acc > MAX_MEASUREMENT_ACCURACY) {
+		throw range_error("accuracy must be within MIN_MEASUREMENT_ACCURACY and MAX_MEASUREMENT_ACCURACY");
+	}
+
+	this->_accuracy = acc;
+
+}
+
 BH1750::BH1750(
 	const int8_t addr,
 	const char* device) noexcept 
@@ -187,6 +195,10 @@ MeasurementMode BH1750::getLastMeasurementMode() const noexcept {
 
 uint8_t BH1750::getMeasurementTime() const noexcept {
 	return this->_mtReg;
+}
+
+float BH1750::getMeasurementAccuracy() const noexcept {
+	return this->_accuracy;
 }
 
 void BH1750::connect(
@@ -246,9 +258,13 @@ void BH1750::reset() const {
 
 }
 
-void BH1750::configure(const MeasurementMode mode, const uint8_t mt) {
-	this->_setMeasurementMode(mode);
-	this->_setMeasurementTimeRegister(mt);
+void BH1750::configure(
+	const MeasurementMode mode,
+	const uint8_t mt,
+	const float acc) {
+		this->_setMeasurementMode(mode);
+		this->_setMeasurementTimeRegister(mt);
+		this->_setMeasurementAccuracy(acc);
 }
 
 uint16_t BH1750::readLevel() const {
@@ -279,7 +295,8 @@ double BH1750::lux() {
 	return convertLevel(
 		this->readLevel(),
 		this->_lastMeasurementMode,
-		this->_mtReg);
+		this->_mtReg,
+		this->_accuracy);
 
 }
 

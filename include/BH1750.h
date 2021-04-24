@@ -43,7 +43,7 @@ public:
 	
 	static constexpr float MIN_MEASUREMENT_ACCURACY = 0.96f;
 	static constexpr float TYP_MEASUREMENT_ACCURACY = 1.2f;
-	static constexpr float MAX_MEASUREMENT_ACCURAC = 1.44f;
+	static constexpr float MAX_MEASUREMENT_ACCURACY = 1.44f;
 	static const uint8_t MIN_MTREG = 31;
 	static const uint8_t TYP_MTREG = 69;
 	static const uint8_t MAX_MTREG = 254;
@@ -71,7 +71,8 @@ public:
 	static double convertLevel(
 		const uint16_t level,
 		const MeasurementMode mode,
-		const uint8_t mt) noexcept;
+		const uint8_t mt,
+		const float acc) noexcept;
 
 
 protected:
@@ -81,10 +82,12 @@ protected:
 	PowerMode _powerMode = PowerMode::POWER_OFF;
 	MeasurementMode _measurementMode;
 	MeasurementMode _lastMeasurementMode;
+	float _accuracy = TYP_MEASUREMENT_ACCURACY;
 	uint8_t _mtReg = TYP_MTREG;
 
 	void _setMeasurementMode(const MeasurementMode mode);
 	void _setMeasurementTimeRegister(const uint8_t mt);
+	void _setMeasurementAccuracy(const float acc) noexcept;
 
 
 public:
@@ -98,6 +101,7 @@ public:
 	MeasurementMode getMeasurementMode() const noexcept;
 	MeasurementMode getLastMeasurementMode() const noexcept;
 	uint8_t getMeasurementTime() const noexcept;
+	float getMeasurementAccuracy() const noexcept;
 
 	/**
 	 * Instruct the sensor to measure light level
@@ -115,7 +119,10 @@ public:
 	 * @param  {MeasurementMode} mode : 
 	 * @param  {uint8_t} mt           : 
 	 */
-	void configure(const MeasurementMode mode, const uint8_t mt = TYP_MTREG);
+	void configure(
+		const MeasurementMode mode,
+		const uint8_t mt = TYP_MTREG,
+		const float acc = TYP_MEASUREMENT_ACCURACY);
 
 	/**
 	 * Read the currently stored light level from the sensor
