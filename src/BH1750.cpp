@@ -102,10 +102,10 @@ std::chrono::duration BH1750::calculateWaitTime(
 		const double ms = static_cast<double>(mt) / static_cast<double>(TYP_MTREG);
 		
 		if(isHighRes(mode)) {
-			return milliseconds(ms * maxWait ? MAX_HIGH_RES_TIME : TYP_HIGH_RES_TIME);
+			return milliseconds(ms * (maxWait ? MAX_HIGH_RES_TIME : TYP_HIGH_RES_TIME));
 		}
 
-		return milliseconds(ms * maxWait ? MAX_LOW_RES_TIME : TYP_LOW_RES_TIME);
+		return milliseconds(ms * (maxWait ? MAX_LOW_RES_TIME : TYP_LOW_RES_TIME));
 
 }
 
@@ -165,7 +165,7 @@ void BH1750::_setMeasurementTimeRegister(const uint8_t mt) {
 
 }
 
-BH1750::_setMeasurementAccuracy(const float acc) noexcept {
+BH1750::_setMeasurementAccuracy(const float acc) {
 
 	if(acc < MIN_MEASUREMENT_ACCURACY || acc > MAX_MEASUREMENT_ACCURACY) {
 		throw range_error("accuracy must be within MIN_MEASUREMENT_ACCURACY and MAX_MEASUREMENT_ACCURACY");

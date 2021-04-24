@@ -80,14 +80,14 @@ protected:
 	const int8_t _addr;
 	int _fd = -1;
 	PowerMode _powerMode = PowerMode::POWER_OFF;
-	MeasurementMode _measurementMode;
-	MeasurementMode _lastMeasurementMode;
+	MeasurementMode _measurementMode = MeasurementMode::CONTINUOUS_HIGH_RES_MODE;
+	MeasurementMode _lastMeasurementMode MeasurementMode::CONTINUOUS_HIGH_RES_MODE;
 	float _accuracy = TYP_MEASUREMENT_ACCURACY;
 	uint8_t _mtReg = TYP_MTREG;
 
 	void _setMeasurementMode(const MeasurementMode mode);
 	void _setMeasurementTimeRegister(const uint8_t mt);
-	void _setMeasurementAccuracy(const float acc) noexcept;
+	void _setMeasurementAccuracy(const float acc);
 
 
 public:
