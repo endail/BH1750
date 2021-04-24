@@ -1,3 +1,6 @@
+src/BH1750.cpp:105:37: style: Clarify calculation precedence for '*' and '?'. [clarifyCalculation]
+   return milliseconds(ms * maxWait ? MAX_HIGH_RES_TIME : TYP_HIGH_RES_TIME);
+                                    ^
 src/BH1750.cpp:261:0: style: The function 'configure' is never used. [unusedFunction]
 
 ^
