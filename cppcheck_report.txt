@@ -1,0 +1,50 @@
+src/BH1750.cpp:178:9: warning: Member variable 'BH1750::_measurementMode' is not initialized in the constructor. [uninitMemberVar]
+BH1750::BH1750(
+        ^
+src/BH1750.cpp:178:9: warning: Member variable 'BH1750::_lastMeasurementMode' is not initialized in the constructor. [uninitMemberVar]
+BH1750::BH1750(
+        ^
+src/BH1750.cpp:171:3: error: Exception thrown in function declared not to throw exceptions. [throwInNoexceptFunction]
+  throw range_error("accuracy must be within MIN_MEASUREMENT_ACCURACY and MAX_MEASUREMENT_ACCURACY");
+  ^
+src/BH1750.cpp:105:37: style: Clarify calculation precedence for '*' and '?'. [clarifyCalculation]
+   return milliseconds(ms * maxWait ? MAX_HIGH_RES_TIME : TYP_HIGH_RES_TIME);
+                                    ^
+src/BH1750.cpp:108:36: style: Clarify calculation precedence for '*' and '?'. [clarifyCalculation]
+  return milliseconds(ms * maxWait ? MAX_LOW_RES_TIME : TYP_LOW_RES_TIME);
+                                   ^
+src/BH1750.cpp:261:0: style: The function 'configure' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:192:0: style: The function 'getLastMeasurementMode' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:200:0: style: The function 'getMeasurementAccuracy' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:188:0: style: The function 'getMeasurementMode' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:196:0: style: The function 'getMeasurementTime' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:69:0: style: The function 'isContinuous' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:45:0: style: The function 'isLowRes' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:284:0: style: The function 'lux' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:303:0: style: The function 'power_down' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:317:0: style: The function 'power_up' is never used. [unusedFunction]
+
+^
+src/BH1750.cpp:245:0: style: The function 'reset' is never used. [unusedFunction]
+
+^
+nofile:0:0: information: Cppcheck cannot find all the include files (use --check-config for details) [missingIncludeSystem]
+
