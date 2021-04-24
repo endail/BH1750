@@ -102,7 +102,7 @@ std::chrono::duration BH1750::calculateWaitTime(
 		const double ms = static_cast<double>(mt) / static_cast<double>(TYP_MTREG);
 		
 		if(isHighRes(mode)) {
-			return milliseconds(ms * (maxWait ? MAX_HIGH_RES_TIME : TYP_HIGH_RES_TIME));
+			return milliseconds(ms * maxWait ? MAX_HIGH_RES_TIME : TYP_HIGH_RES_TIME);
 		}
 
 		return milliseconds(ms * (maxWait ? MAX_LOW_RES_TIME : TYP_LOW_RES_TIME));
