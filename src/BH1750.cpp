@@ -150,10 +150,6 @@ void BH1750::_setMeasurementTimeRegister(const uint8_t mt) {
 		throw std::range_error("reg must be between MIN_MTREG and MAX_MTREG");
 	}
 
-	//there's an issue here with measurement mode
-	//if setMeasurementMode is called AFTER this function, the
-	//config will be incorrect
-	//
 	//is the third I2C write call needed?
 	if(	::wiringPiI2CWrite(this->_fd, 0b01000000 | (mt & 0b11100000)) < 0 ||
 		::wiringPiI2CWrite(this->_fd, 0b01100000 | (mt & 0b00011111)) < 0 ||
