@@ -14,8 +14,8 @@ jobs:
 
       - name: build wiringPi
         run: |
-          ./build
-          echo /usr/local/lib >> /etc/ld.so.conf
+          sudo ./build
+          sudo echo /usr/local/lib >> /etc/ld.so.conf
           sudo ldconfig
 
       - uses: actions/checkout@v2
