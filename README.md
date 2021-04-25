@@ -7,10 +7,14 @@ Use with Raspberry Pi.
 #include <iostream>
 
 int main() {
+  
   BH1750::BH1750 sensor;
   sensor.connect();
+  
   std::cout << sensor.lux() << std::endl;
+  
   return 0;
+
 }
 ```
 
