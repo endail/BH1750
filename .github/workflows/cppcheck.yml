@@ -13,7 +13,10 @@ jobs:
           repository: 'WiringPi/WiringPi'
 
       - name: build wiringPi
-        run: ./build
+        run: |
+          ./build
+          echo /usr/local/lib >> /etc/ld.so.conf
+          sudo ldconfig
 
       - uses: actions/checkout@v2
 
