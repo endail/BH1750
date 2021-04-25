@@ -58,7 +58,7 @@ public:
 	static bool isContinuous(const MeasurementMode mode) noexcept;
 	static bool isOneTime(const MeasurementMode mode) noexcept;
 
-	static std::chrono::duration calculateWaitTime(
+	static std::chrono::milliseconds calculateWaitTime(
 		const uint8_t mt,
 		const MeasurementMode mode,
 		const bool maxWait = true) noexcept;
@@ -79,9 +79,9 @@ protected:
 	const char* _dev;
 	const int8_t _addr;
 	int _fd = -1;
-	PowerMode _powerMode = PowerMode::POWER_OFF;
+	PowerMode _powerMode = PowerMode::POWER_DOWN;
 	MeasurementMode _measurementMode = MeasurementMode::CONTINUOUS_HIGH_RES_MODE;
-	MeasurementMode _lastMeasurementMode MeasurementMode::CONTINUOUS_HIGH_RES_MODE;
+	MeasurementMode _lastMeasurementMode = MeasurementMode::CONTINUOUS_HIGH_RES_MODE;
 	float _accuracy = TYP_MEASUREMENT_ACCURACY;
 	uint8_t _mtReg = TYP_MTREG;
 
@@ -102,6 +102,10 @@ public:
 	MeasurementMode getLastMeasurementMode() const noexcept;
 	uint8_t getMeasurementTime() const noexcept;
 	float getMeasurementAccuracy() const noexcept;
+
+	void connect(
+		const MeasurementMode mm = MeasurementMode::CONTINUOUS_HIGH_RES_MODE,
+		const uint8_t mt = TYP_MTREG);
 
 	/**
 	 * Instruct the sensor to measure light level

@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "../include/BH1750.h"
+#include <cmath>
 #include <stdexcept>
 #include <thread>
 #include <unistd.h>
@@ -92,20 +93,23 @@ bool BH1750::isOneTime(const MeasurementMode mode) noexcept {
 
 }
 
-std::chrono::duration BH1750::calculateWaitTime(
+std::chrono::milliseconds BH1750::calculateWaitTime(
 	const uint8_t mt,
 	const MeasurementMode mode,
-	const bool maxWait = true) noexcept {
+	const bool maxWait) noexcept {
 
-	using namespace std::chrono;
+		using namespace std::chrono;
 
-		const double ms = static_cast<double>(mt) / static_cast<double>(TYP_MTREG);
-		
+		size_t ms = std::round(static_cast<double>(mt) / static_cast<double>(TYP_MTREG));
+
 		if(isHighRes(mode)) {
-			return milliseconds(ms * (maxWait ? MAX_HIGH_RES_TIME : TYP_HIGH_RES_TIME));
+			ms = ms * (maxWait ? MAX_HIGH_RES_TIME.count() : TYP_HIGH_RES_TIME.count());
+		}
+		else {
+			ms = ms * (maxWait ? MAX_LOW_RES_TIME.count() : TYP_LOW_RES_TIME.count());
 		}
 
-		return milliseconds(ms * (maxWait ? MAX_LOW_RES_TIME : TYP_LOW_RES_TIME));
+		return milliseconds(ms);
 
 }
 
@@ -161,10 +165,10 @@ void BH1750::_setMeasurementTimeRegister(const uint8_t mt) {
 
 }
 
-BH1750::_setMeasurementAccuracy(const float acc) {
+void BH1750::_setMeasurementAccuracy(const float acc) {
 
 	if(acc < MIN_MEASUREMENT_ACCURACY || acc > MAX_MEASUREMENT_ACCURACY) {
-		throw range_error("accuracy must be within MIN_MEASUREMENT_ACCURACY and MAX_MEASUREMENT_ACCURACY");
+		throw std::range_error("accuracy must be within MIN_MEASUREMENT_ACCURACY and MAX_MEASUREMENT_ACCURACY");
 	}
 
 	this->_accuracy = acc;
@@ -244,7 +248,7 @@ void BH1750::reset() const {
 	//pg. 5
 	//"Reset Data register value. Reset command is not acceptable in
 	//Power Down mode."
-	if(this->_mode == PowerMode::POWER_DOWN) {
+	if(this->_powerMode == PowerMode::POWER_DOWN) {
 		throw std::runtime_error("cannot reset while powered down");
 	}
 
@@ -281,7 +285,7 @@ double BH1750::lux() {
 
 	this->measure();
 
-	const std::chrono::duration waitTime = calculateWaitTime(
+	const std::chrono::milliseconds waitTime = calculateWaitTime(
 		this->_mtReg,
 		this->_lastMeasurementMode,
 		true);
@@ -298,7 +302,7 @@ double BH1750::lux() {
 
 void BH1750::power_down() {
 
-	if(this->_powerMode == PowerMode::POWER_OFF) {
+	if(this->_powerMode == PowerMode::POWER_DOWN) {
 		return;
 	}
 

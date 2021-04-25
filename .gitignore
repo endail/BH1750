@@ -2,6 +2,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/c++,vscode,visualstudiocode,windows,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=c++,vscode,visualstudiocode,windows,linux
 
+
+bin/
+
 ### C++ ###
 # Prerequisites
 *.d
