@@ -1,34 +1,31 @@
-src/BH1750.cpp:257:0: style: The function 'configure' is never used. [unusedFunction]
+src/BH1750.cpp:261:0: style: The function 'configure' is never used. [unusedFunction]
 
 ^
-src/BH1750.cpp:188:0: style: The function 'getLastMeasurementMode' is never used. [unusedFunction]
+src/BH1750.cpp:192:0: style: The function 'getLastMeasurementMode' is never used. [unusedFunction]
 
 ^
-src/BH1750.cpp:196:0: style: The function 'getMeasurementAccuracy' is never used. [unusedFunction]
+src/BH1750.cpp:200:0: style: The function 'getMeasurementAccuracy' is never used. [unusedFunction]
 
 ^
-src/BH1750.cpp:184:0: style: The function 'getMeasurementMode' is never used. [unusedFunction]
+src/BH1750.cpp:188:0: style: The function 'getMeasurementMode' is never used. [unusedFunction]
 
 ^
-src/BH1750.cpp:192:0: style: The function 'getMeasurementTime' is never used. [unusedFunction]
+src/BH1750.cpp:196:0: style: The function 'getMeasurementTime' is never used. [unusedFunction]
 
 ^
-src/BH1750.cpp:69:0: style: The function 'isContinuous' is never used. [unusedFunction]
+src/BH1750.cpp:70:0: style: The function 'isContinuous' is never used. [unusedFunction]
 
 ^
-src/BH1750.cpp:45:0: style: The function 'isLowRes' is never used. [unusedFunction]
+src/BH1750.cpp:46:0: style: The function 'isLowRes' is never used. [unusedFunction]
 
 ^
-src/BH1750.cpp:280:0: style: The function 'lux' is never used. [unusedFunction]
+src/BH1750.cpp:303:0: style: The function 'power_down' is never used. [unusedFunction]
 
 ^
-src/BH1750.cpp:299:0: style: The function 'power_down' is never used. [unusedFunction]
+src/BH1750.cpp:317:0: style: The function 'power_up' is never used. [unusedFunction]
 
 ^
-src/BH1750.cpp:313:0: style: The function 'power_up' is never used. [unusedFunction]
-
-^
-src/BH1750.cpp:241:0: style: The function 'reset' is never used. [unusedFunction]
+src/BH1750.cpp:245:0: style: The function 'reset' is never used. [unusedFunction]
 
 ^
 nofile:0:0: information: Cppcheck cannot find all the include files (use --check-config for details) [missingIncludeSystem]
