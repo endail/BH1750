@@ -98,8 +98,6 @@ std::chrono::milliseconds BH1750::calculateWaitTime(
 	const MeasurementMode mode,
 	const bool maxWait) noexcept {
 
-		using namespace std::chrono;
-
 		size_t ms = std::round(static_cast<double>(mt) / static_cast<double>(TYP_MTREG));
 
 		if(isHighRes(mode)) {
@@ -109,7 +107,7 @@ std::chrono::milliseconds BH1750::calculateWaitTime(
 			ms = ms * (maxWait ? MAX_LOW_RES_TIME.count() : TYP_LOW_RES_TIME.count());
 		}
 
-		return milliseconds(ms);
+		return std::chrono::milliseconds(ms);
 
 }
 
@@ -121,16 +119,13 @@ double BH1750::convertLevel(
 
 		//algorithm on datasheet pg. 11
 
-		double temp = static_cast<double>(level);
+		double temp = 
+			static_cast<double>(level)
+			/ acc
+			* (static_cast<double>(TYP_MTREG) / static_cast<double>(mt));
 
 		if(isHighRes(mode) && isMode2(mode)) {
-			temp = (temp / acc) *
-				(static_cast<double>(TYP_MTREG) / static_cast<double>(mt)) /
-				2.0;
-		}
-		else {
-			temp = temp / acc * 
-				(static_cast<double>(TYP_MTREG) / static_cast<double>(mt));
+			temp = temp / 2.0;
 		}
 
 		return temp;
@@ -198,6 +193,10 @@ uint8_t BH1750::getMeasurementTime() const noexcept {
 
 float BH1750::getMeasurementAccuracy() const noexcept {
 	return this->_accuracy;
+}
+
+PowerMode BH1750::getPowerMode() const noexcept {
+	return this->_powerMode;
 }
 
 void BH1750::connect(

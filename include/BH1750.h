@@ -138,6 +138,7 @@ public:
 	MeasurementMode getLastMeasurementMode() const noexcept;
 	uint8_t getMeasurementTime() const noexcept;
 	float getMeasurementAccuracy() const noexcept;
+	PowerMode getPowerMode() const noexcept;
 
 	/**
 	 * @param  {MeasurementMode} mm : mode
