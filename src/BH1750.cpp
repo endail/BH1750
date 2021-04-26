@@ -119,6 +119,8 @@ double BH1750::convertLevel(
 	const uint8_t mt,
 	const float acc) noexcept {
 
+		//algorithm on datasheet pg. 11
+
 		double temp = static_cast<double>(level);
 
 		if(isHighRes(mode) && isMode2(mode)) {
@@ -147,14 +149,13 @@ void BH1750::_setMeasurementMode(const MeasurementMode mode) {
 
 void BH1750::_setMeasurementTimeRegister(const uint8_t mt) {
 
-	//https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf
-	//pg. 11
-	//range is between 31 (inc) and 254 (inc)
 	if(!(mt >= MIN_MTREG && mt <= MAX_MTREG)) {
 		throw std::range_error("reg must be between MIN_MTREG and MAX_MTREG");
 	}
 
-	//is the third I2C write call needed?
+	//procedure for setting mt register on datasheet pg. 11
+	//unsure if third I2C call is needed
+	
 	if(	::wiringPiI2CWrite(this->_fd, 0b01000000 | (mt & 0b11100000)) < 0 ||
 		::wiringPiI2CWrite(this->_fd, 0b01100000 | (mt & 0b00011111)) < 0 ||
 		::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(this->_measurementMode)) < 0 ) {
@@ -175,10 +176,8 @@ void BH1750::_setMeasurementAccuracy(const float acc) {
 
 }
 
-BH1750::BH1750(
-	const int8_t addr,
-	const char* device) noexcept 
-		: _dev(device), _addr(addr) {
+BH1750::BH1750(const int8_t addr, const char* device) noexcept 
+	: _dev(device), _addr(addr) {
 }
 
 BH1750::~BH1750() {
@@ -203,9 +202,10 @@ float BH1750::getMeasurementAccuracy() const noexcept {
 
 void BH1750::connect(
 	const MeasurementMode mm,
-	const uint8_t mt) {
+	const uint8_t mt,
+	const float acc) {
 
-		//only permit this function to execute if no file descriptor set
+		//setup should only occur if file descriptor has not already been set
 		if(this->_fd >= 0) {
 			throw std::runtime_error("sensor is already connected");
 		}
@@ -215,16 +215,11 @@ void BH1750::connect(
 		}
 
 		this->_powerMode = PowerMode::POWER_ON;
-		this->_setMeasurementMode(mm);
-		this->_setMeasurementTimeRegister(mt);
+		this->configure(mm, mt, acc);
 
 }
 
 void BH1750::measure() {
-
-	if(this->_powerMode == PowerMode::POWER_DOWN) {
-		throw std::runtime_error("sensor is powered down");
-	}
 	
 	if(::wiringPiI2CWrite(this->_fd, static_cast<uint8_t>(this->_measurementMode)) < 0) {
 		throw std::runtime_error("failed to measure light level");
@@ -232,10 +227,8 @@ void BH1750::measure() {
 
 	this->_lastMeasurementMode = this->_measurementMode;
 
-	//https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf
-	//pg. 5
-	//One Time modes return the device to power down mode after
-	//measurement
+	//One Time modes return the device to power down
+	//after measurement. see: datasheet pg. 5
 	if(isOneTime(this->_lastMeasurementMode)) {
 		this->_powerMode = PowerMode::POWER_DOWN;
 	}
@@ -244,10 +237,8 @@ void BH1750::measure() {
 
 void BH1750::reset() const {
 
-	//https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf
-	//pg. 5
 	//"Reset Data register value. Reset command is not acceptable in
-	//Power Down mode."
+	//Power Down mode." See: datasheet pg. 5
 	if(this->_powerMode == PowerMode::POWER_DOWN) {
 		throw std::runtime_error("cannot reset while powered down");
 	}
@@ -271,6 +262,7 @@ uint16_t BH1750::readLevel() const {
 
 	//may need to replace this with two 8-bit reads
 	//or lower-level 16bit read() call
+	//unknown at this stage if this is working correctly
 	const int count = ::wiringPiI2CReadReg16(this->_fd, 0);
 
 	if(count < 0) {
@@ -302,6 +294,7 @@ double BH1750::lux() {
 
 void BH1750::power_down() {
 
+	//do nothing if device is already powered down
 	if(this->_powerMode == PowerMode::POWER_DOWN) {
 		return;
 	}
@@ -316,6 +309,7 @@ void BH1750::power_down() {
 
 void BH1750::power_up() {
 
+	//do nothing if device is already powered up
 	if(this->_powerMode == PowerMode::POWER_ON) {
 		return;
 	}

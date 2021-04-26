@@ -4,7 +4,8 @@
 		{
 			"label": "build test",
 			"type": "shell",
-			"command": "mkdir bin & ${env:RPI_TOOLCHAIN}/bin/arm-linux-gnueabihf-g++.exe -o bin/test -I. -I.. -Iinclude/ src/BH1750.cpp tests/test.cpp -lwiringPi"
+			"command": "mkdir bin & ${env:RPI_TOOLCHAIN}/bin/arm-linux-gnueabihf-g++.exe -o bin/test -I. -I.. -Iinclude/ src/BH1750.cpp tests/test.cpp -lwiringPi",
+			"problemMatcher": []
 		}
 	]
 }

@@ -27,6 +27,10 @@
 
 namespace BH1750 {
 
+/**
+ * Values taken from datasheet pg. 5
+ */
+
 enum class Instruction : uint8_t {
 	RESET =	0b00000111
 };

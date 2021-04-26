@@ -30,23 +30,44 @@
 namespace BH1750 {
 class BH1750 {
 
+/**
+ * Datasheet
+ * https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf
+ */
+
 public:
 
 	static constexpr const char* const DEFAULT_I2C_DEVICE = "/dev/i2c-1";
 	
-	//https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf
-	//pg. 10
-	//When ADDR pin is high (>= 0.7VCC), I2C address is 0x5C
-	//When ADDR pin is low (<= 0.3VCC), I2C address is 0x23
+	/**
+	 * When BH1750 address pin is <= 0.3VCC, I2C address is 0x23
+	 * Datasheet pg. 10
+	 */
 	static const int8_t I2C_LOW_ADDR = 0x23;
+
+	/**
+	 * When BH1750 address pin is >= 0.7VCC, I2C address is 0x5C
+	 * Datasheet pg. 10
+	 */
 	static const int8_t I2C_HIGH_ADDR = 0x5C;
 	
+	/**
+	 * Values taken from datasheet pg. 2
+	 */
 	static constexpr float MIN_MEASUREMENT_ACCURACY = 0.96f;
 	static constexpr float TYP_MEASUREMENT_ACCURACY = 1.2f;
 	static constexpr float MAX_MEASUREMENT_ACCURACY = 1.44f;
+	
+	/**
+	 * Values taken from datasheet pg. 11
+	 */
 	static const uint8_t MIN_MTREG = 31;
 	static const uint8_t TYP_MTREG = 69;
 	static const uint8_t MAX_MTREG = 254;
+	
+	/**
+	 * Values taken from datasheet pg. 2
+	 */
 	static constexpr std::chrono::milliseconds TYP_HIGH_RES_TIME = std::chrono::milliseconds(120);
 	static constexpr std::chrono::milliseconds MAX_HIGH_RES_TIME = std::chrono::milliseconds(180);
 	static constexpr std::chrono::milliseconds TYP_LOW_RES_TIME = std::chrono::milliseconds(16);
@@ -58,15 +79,24 @@ public:
 	static bool isContinuous(const MeasurementMode mode) noexcept;
 	static bool isOneTime(const MeasurementMode mode) noexcept;
 
+	/**
+	 * Calculates the wait time needed between measurement and data ready
+	 * @param  {uint8_t} mt           : time
+	 * @param  {MeasurementMode} mode : mode
+	 * @param  {bool} maxWait         : whether to return the max wait time (as opposed to typical)
+	 */
 	static std::chrono::milliseconds calculateWaitTime(
 		const uint8_t mt,
 		const MeasurementMode mode,
 		const bool maxWait = true) noexcept;
 
 	/**
-	 * Converts a sensor light level into lux level depending on current mode
-	 * @param  {uint16_t} level : 
-	 * @return {double}         : 
+	 * Convert a light level from the sensor into lux level
+	 * @param  {uint16_t} level       : raw light level from sensor
+	 * @param  {MeasurementMode} mode : mode
+	 * @param  {uint8_t} mt           : time
+	 * @param  {float} acc            : accuracy
+	 * @return {double}               : lux
 	 */
 	static double convertLevel(
 		const uint16_t level,
@@ -92,6 +122,12 @@ protected:
 
 public:
 
+	/**
+	 * BH1750 
+	 * 
+	 * @param  {int8_t} addr  : I2C address
+	 * @param  {char*} device : I2C device
+	 */
 	BH1750(
 		const int8_t addr = I2C_LOW_ADDR,
 		const char* device = DEFAULT_I2C_DEVICE) noexcept;
@@ -103,9 +139,15 @@ public:
 	uint8_t getMeasurementTime() const noexcept;
 	float getMeasurementAccuracy() const noexcept;
 
+	/**
+	 * @param  {MeasurementMode} mm : mode
+	 * @param  {uint8_t} mt         : time
+	 * @param  {float} acc          : accuracy
+	 */
 	void connect(
 		const MeasurementMode mm = MeasurementMode::CONTINUOUS_HIGH_RES_MODE,
-		const uint8_t mt = TYP_MTREG);
+		const uint8_t mt = TYP_MTREG,
+		const float acc = TYP_MEASUREMENT_ACCURACY);
 
 	/**
 	 * Instruct the sensor to measure light level
@@ -118,10 +160,10 @@ public:
 	void reset() const;
 
 	/**
-	 * This function exists because of the chance setting mt reg will be incorrect
-	 * if mode is changed
-	 * @param  {MeasurementMode} mode : 
-	 * @param  {uint8_t} mt           : 
+	 * Change sensor settings
+	 * @param  {MeasurementMode} mode : mode
+	 * @param  {uint8_t} mt           : time
+	 * @param  {float} acc            : accuracy
 	 */
 	void configure(
 		const MeasurementMode mode,
