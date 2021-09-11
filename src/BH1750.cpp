@@ -43,9 +43,9 @@ bool BH1750::isHighRes(const MeasurementMode mode) noexcept {
         case MeasurementMode::ONE_TIME_HIGH_RES_MODE:
         case MeasurementMode::ONE_TIME_HIGH_RES_MODE_2:
             return true;
-    }
-
-    return false;
+        default:
+            return false;
+    
 
 }
 
@@ -55,9 +55,9 @@ bool BH1750::isLowRes(const MeasurementMode mode) noexcept {
         case MeasurementMode::CONTINUOUS_LOW_RES_MODE:
         case MeasurementMode::ONE_TIME_LOW_RES_MODE:
             return true;
+        default:
+            return false;
     }
-
-    return false;
 
 }
 
@@ -67,9 +67,9 @@ bool BH1750::isMode2(const MeasurementMode mode) noexcept {
         case MeasurementMode::CONTINUOUS_HIGH_RES_MODE_2:
         case MeasurementMode::ONE_TIME_HIGH_RES_MODE_2:
             return true;
+        default:
+            return false;
     }
-
-    return false;
 
 }
 
@@ -80,9 +80,9 @@ bool BH1750::isContinuous(const MeasurementMode mode) noexcept {
         case MeasurementMode::CONTINUOUS_HIGH_RES_MODE_2:
         case MeasurementMode::CONTINUOUS_LOW_RES_MODE:
             return true;
+        default:
+            return false;
     }
-
-    return false;
 
 }
 
@@ -93,9 +93,9 @@ bool BH1750::isOneTime(const MeasurementMode mode) noexcept {
         case MeasurementMode::ONE_TIME_HIGH_RES_MODE_2:
         case MeasurementMode::ONE_TIME_LOW_RES_MODE:
             return true;
+        default:
+            return false;
     }
-
-    return false;
 
 }
 
