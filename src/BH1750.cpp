@@ -45,6 +45,7 @@ bool BH1750::isHighRes(const MeasurementMode mode) noexcept {
             return true;
         default:
             return false;
+     }
     
 
 }
