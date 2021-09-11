@@ -185,7 +185,7 @@ BH1750::BH1750(const int device, const int addr) noexcept :
     _handle(-1),
     _powerMode(PowerMode::POWER_DOWN),
     _measurementMode(MeasurementMode::CONTINUOUS_HIGH_RES_MODE),
-    _measurementMode(MeasurementMode::CONTINUOUS_HIGH_RES_MODE),
+    _lastMeasurementMode(MeasurementMode::CONTINUOUS_HIGH_RES_MODE),
     _accuracy(TYP_MEASUREMENT_ACCURACY),
     _mtReg(TYP_MTREG) {
 }
