@@ -44,13 +44,13 @@ public:
      * When BH1750 address pin is <= 0.3VCC, I2C address is 0x23
      * Datasheet pg. 10
      */
-    static const std::int8_t I2C_LOW_ADDR = 0x23;
+    static const int I2C_LOW_ADDR = 0x23;
 
     /**
      * When BH1750 address pin is >= 0.7VCC, I2C address is 0x5C
      * Datasheet pg. 10
      */
-    static const std::int8_t I2C_HIGH_ADDR = 0x5C;
+    static const int I2C_HIGH_ADDR = 0x5C;
     
     /**
      * Values taken from datasheet pg. 2
@@ -112,11 +112,11 @@ public:
      * @param  {char*} device : I2C device
      */
     BH1750(
-        const std::int8_t addr = I2C_LOW_ADDR,
-        const int device = DEFAULT_I2C_DEVICE) noexcept;
+        const int device = DEFAULT_I2C_DEVICE,
+        const int addr = I2C_LOW_ADDR) noexcept;
 
     virtual ~BH1750();
-    
+
     MeasurementMode getMeasurementMode() const noexcept;
     MeasurementMode getLastMeasurementMode() const noexcept;
     std::uint8_t getMeasurementTime() const noexcept;
@@ -173,7 +173,7 @@ public:
 protected:
 
     const int _dev;
-    const std::int8_t _addr;
+    const int _addr;
     int _handle;
 
     PowerMode _powerMode;

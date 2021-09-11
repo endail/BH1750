@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "../include/BH1750.h"
+#include "../include/Instruction.h"
 #include <cmath>
 #include <cstdint>
 #include <lgpio.h>
@@ -178,7 +179,7 @@ void BH1750::_setMeasurementAccuracy(const float acc) {
 
 }
 
-BH1750::BH1750(const std::int8_t addr, const int device) noexcept :
+BH1750::BH1750(const int device, const int addr) noexcept :
     _dev(device),
     _addr(addr),
     _handle(-1),
