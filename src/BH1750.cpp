@@ -159,9 +159,9 @@ void BH1750::_setMeasurementTimeRegister(const std::uint8_t mt) {
     //unsure if third I2C call is needed
 
     if(!(
-        ::lgI2cWriteByte(this->_handle, 0b01000000 | (mt & 0b11100000)) &&
-        ::lgI2cWriteByte(this->_handle, 0b01100000 | (mt & 0b00011111)) &&
-        ::lgI2cWriteByte(this->_handle, static_cast<std::uint8_t>(this->_measurementMode))
+        ::lgI2cWriteByte(this->_handle, 0b01000000 | (mt & 0b11100000)) == 0 &&
+        ::lgI2cWriteByte(this->_handle, 0b01100000 | (mt & 0b00011111)) == 0 &&
+        ::lgI2cWriteByte(this->_handle, static_cast<std::uint8_t>(this->_measurementMode)) == 0
     )) {
         throw std::runtime_error("failed to set measurement register");
     }
