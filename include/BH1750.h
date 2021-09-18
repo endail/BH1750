@@ -37,7 +37,6 @@ class BH1750 {
 
 public:
 
-    //static constexpr const char* const DEFAULT_I2C_DEVICE = "/dev/i2c-1";
     static const int DEFAULT_I2C_DEVICE = 1;
 
     /**
@@ -172,9 +171,9 @@ public:
 
 protected:
 
+    int _handle;
     const int _dev;
     const int _addr;
-    int _handle;
 
     PowerMode _powerMode;
     MeasurementMode _measurementMode;

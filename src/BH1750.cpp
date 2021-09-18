@@ -105,7 +105,7 @@ std::chrono::milliseconds BH1750::calculateWaitTime(
     const MeasurementMode mode,
     const bool maxWait) noexcept {
 
-        std::size_t ms = std::round(static_cast<double>(mt) / static_cast<double>(TYP_MTREG));
+        double ms = static_cast<double>(mt) / static_cast<double>(TYP_MTREG);
 
         if(isHighRes(mode)) {
             ms = ms * (maxWait ? MAX_HIGH_RES_TIME.count() : TYP_HIGH_RES_TIME.count());
@@ -114,7 +114,7 @@ std::chrono::milliseconds BH1750::calculateWaitTime(
             ms = ms * (maxWait ? MAX_LOW_RES_TIME.count() : TYP_LOW_RES_TIME.count());
         }
 
-        return std::chrono::milliseconds(ms);
+        return std::chrono::milliseconds(static_cast<int>(std::round(ms)));
 
 }
 
@@ -181,9 +181,9 @@ void BH1750::_setMeasurementAccuracy(const float acc) {
 }
 
 BH1750::BH1750(const int device, const int addr) noexcept :
+    _handle(-1),
     _dev(device),
     _addr(addr),
-    _handle(-1),
     _powerMode(PowerMode::POWER_DOWN),
     _measurementMode(MeasurementMode::CONTINUOUS_HIGH_RES_MODE),
     _lastMeasurementMode(MeasurementMode::CONTINUOUS_HIGH_RES_MODE),
@@ -274,8 +274,7 @@ void BH1750::configure(
 
 std::uint16_t BH1750::readLevel() const {
 
-    //read from the 0th register
-    const int word = ::lgI2cReadWordData(this->_handle, 0);
+    const auto word = ::lgI2cReadWordData(this->_handle, 0);
 
     if(word < 0) {
         throw std::runtime_error("failed to read light level");
