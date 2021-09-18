@@ -228,7 +228,7 @@ void BH1750::connect(
             throw std::runtime_error("failed to connect to device");
         }
 
-        this->_powerMode = PowerMode::POWER_ON;
+        this->_powerMode = PowerMode::POWER_UP;
         this->configure(mm, mt, acc);
 
 }
@@ -322,15 +322,15 @@ void BH1750::powerDown() {
 void BH1750::powerUp() {
 
     //do nothing if device is already powered up
-    if(this->_powerMode == PowerMode::POWER_ON) {
+    if(this->_powerMode == PowerMode::POWER_UP) {
         return;
     }
 
-    if(::lgI2cWriteByte(this->_handle, static_cast<std::uint8_t>(PowerMode::POWER_ON)) < 0) {
+    if(::lgI2cWriteByte(this->_handle, static_cast<std::uint8_t>(PowerMode::POWER_UP)) < 0) {
         throw std::runtime_error("device failed to power on");
     }
 
-    this->_powerMode = PowerMode::POWER_ON;
+    this->_powerMode = PowerMode::POWER_UP;
 
 }
 
