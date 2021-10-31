@@ -132,6 +132,8 @@ public:
         const std::uint8_t mt = TYP_MTREG,
         const float acc = TYP_MEASUREMENT_ACCURACY);
 
+    void disconnect();
+
     /**
      * Instruct the sensor to measure light level
      */

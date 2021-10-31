@@ -36,7 +36,7 @@ constexpr std::chrono::milliseconds BH1750::TYP_LOW_RES_TIME;
 constexpr std::chrono::milliseconds BH1750::MAX_LOW_RES_TIME;
 
 bool BH1750::isHighRes(const MeasurementMode mode) noexcept {
-    
+
     switch(mode) {
         case MeasurementMode::CONTINUOUS_HIGH_RES_MODE:
         case MeasurementMode::CONTINUOUS_HIGH_RES_MODE_2:
@@ -45,8 +45,7 @@ bool BH1750::isHighRes(const MeasurementMode mode) noexcept {
             return true;
         default:
             return false;
-     }
-    
+    }
 
 }
 
@@ -192,7 +191,14 @@ BH1750::BH1750(const int device, const int addr) noexcept :
 }
 
 BH1750::~BH1750() {
-    ::lgI2cClose(this->_handle);
+
+    try {
+        this->disconnect();
+    }
+    catch(...) {
+        //prevent propagation
+    }
+
 }
 
 MeasurementMode BH1750::getMeasurementMode() const noexcept {
@@ -221,7 +227,7 @@ void BH1750::connect(
     const float acc) {
 
         if(this->_handle >= 0) {
-            throw std::runtime_error("sensor is already connected");
+            return;
         }
 
         if((this->_handle = ::lgI2cOpen(this->_dev, this->_addr, 0)) < 0) {
@@ -230,6 +236,20 @@ void BH1750::connect(
 
         this->_powerMode = PowerMode::POWER_UP;
         this->configure(mm, mt, acc);
+
+}
+
+void BH1750::disconnect() {
+
+    if(this->_handle < 0) {
+        return;
+    }
+
+    if(::lgI2cClose(this->_handle) < 0) {
+        throw std::runtime_error("failed to disconnect from device");
+    }
+
+    this->_handle = -1;
 
 }
 
